@@ -1,1 +1,4 @@
-
+numpy==2.2.5
+opencv_contrib_python==4.7.0.72
+opencv_python==4.9.0.80
+pioneer_sdk==0.5.3
