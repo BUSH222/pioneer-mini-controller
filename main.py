@@ -15,7 +15,10 @@ class App(tk.Tk):
         self.channels = [1500, 1500, 1500, 1500, 2000]
         self.default_channels = [1500, 1500, 1500, 1500, 2000]
 
+        self.speed = [0, 0, 0, 0]  # vx, vy, vz, yaw_rate
+
         self.pioneer_armed = False
+        self.flight = False
 
         if True:  # Initialise tkinter
             # --- Sidebar Menu (left) ---
@@ -97,14 +100,14 @@ class App(tk.Tk):
 
     def postinit(self):
         try:
-            self.pioneer = Pioneer()
+            self.pioneer = Pioneer(logger=None)
             self.camera = Camera()
             self.bind("<KeyPress>", self.on_key_press)
             self.bind("<KeyRelease>", self.on_key_release)
             self.update_navbar()
         except Exception as e:
             self.add_log(f"nError initializing Pioneer: {e}\n Trying again in 3 seconds...")
-            self.after(3000, self.postinit())
+            self.after(3000, self.postinit)
 
     def add_log(self, message):
         self.logs_text.config(state="normal")
@@ -115,58 +118,63 @@ class App(tk.Tk):
     def on_key_press(self, event):
         """Handle key press events."""
         key = event.keysym.lower()
-        print(key)
         if key == "w":
             self.add_log("Moving Forward")
+            self.speed[1] += 0.2
         elif key == "s":
             self.add_log("Moving Backward")
+            self.speed[1] -= 0.2
         elif key == "a":
             self.add_log("Yawing Left")
+            self.speed[3] += 0.2
         elif key == "d":
             self.add_log("Yawing Right")
+            self.speed[3] -= 0.2
         elif key == "e":
-            self.add_log("Rolling Right")
+            self.add_log("Translating Right")
         elif key == "q":
-            self.add_log("Rolling Left")
+            self.add_log("Translating Left")
         elif key == "shift_l":
             self.add_log("Moving Up")
-            self.channels[0] += 200
+            self.speed[2] += 0.1
         elif key == "control_l":
             self.add_log("Moving Down")
-            self.channels[0] -= 200
+            self.speed[2] -= 0.1
         elif key == "space":
             if not self.pioneer_armed:
                 self.add_log("Arming the engines")
                 self.pioneer.arm()
+                self.pioneer_armed = not self.pioneer_armed
+                self.maintain_airspeed()
+                return
             else:
                 self.add_log("Disarming the engines")
                 self.pioneer.disarm()
-            self.pioneer_armed = not self.pioneer_armed
+                self.pioneer_armed = not self.pioneer_armed
+                self.flight = False
+
+        elif key == "escape":
+            self.speed = [0, 0, 0, 0]
+
         elif key == "tab":
-            if self.pioneer_armed:
+            if not self.flight:
                 self.add_log("Taking off")
                 self.pioneer.takeoff()
+                self.flight = True
             else:
                 self.add_log("Landing")
                 self.pioneer.land()
-
-        if self.pioneer_armed:
-            self.pioneer.send_rc_channels(channel_1=self.channels[0],
-                                          channel_2=self.channels[1],
-                                          channel_3=self.channels[2],
-                                          channel_4=self.channels[3],
-                                          channel_5=self.channels[4])
+                self.flight = False
+        self.maintain_airspeed(immediate=True)
 
     def on_key_release(self, event):
         """Handle key release events."""
-        # if self.pioneer_armed:
-        #     self.pioneer.send_rc_channels(channel_1=self.default_channels[0],
-        #                                   channel_2=self.default_channels[1],
-        #                                   channel_3=self.default_channels[2],
-        #                                   channel_4=self.default_channels[3],
-        #                                   channel_5=self.default_channels[4])
-        # key = event.keysym.lower()
         pass
+
+    def maintain_airspeed(self, immediate=False):
+        self.pioneer.set_manual_speed(*self.speed)
+        # if self.pioneer_armed and not immediate:
+        #     self.after(100, self.maintain_airspeed)
 
     def apply_settings(self):
         control_mode = self.control_mode.get()
@@ -179,10 +187,12 @@ class App(tk.Tk):
         try:
             drone_connected = "Connected" if self.pioneer.connected() else "Disconnected"
             camera_status = "On" if self.camera.connected else "Off"
-            battery_level = f"{self.pioneer.get_battery_status()} V"
+            battery_level = self.pioneer.get_battery_status()
+            if battery_level is not None:
+                self.label_battery.config(text=f"Battery: {battery_level} `v")
             self.label_drone_connection.config(text=f"Drone: {drone_connected}")
             self.label_camera_connection.config(text=f"Camera: {camera_status}")
-            self.label_battery.config(text=f"Battery: {battery_level}")
+
         except Exception as e:
             self.add_log(f"Error updating navbar: {e}")
         self.after(2000, self.update_navbar)
