@@ -48,7 +48,7 @@ class App(tk.Tk):
 
             self.label_drone_connection = ttk.Label(status_frame, text="Drone: Disconnected")
             self.label_camera_connection = ttk.Label(status_frame, text="Camera: Off")
-            self.label_battery = ttk.Label(status_frame, text="Battery: 100%")
+            self.label_battery = ttk.Label(status_frame, text="Battery: ?? V")
 
             self.label_drone_connection.pack(side="left", padx=5)
             self.label_camera_connection.pack(side="left", padx=5)
@@ -101,6 +101,7 @@ class App(tk.Tk):
             self.camera = Camera()
             self.bind("<KeyPress>", self.on_key_press)
             self.bind("<KeyRelease>", self.on_key_release)
+            self.update_navbar()
         except Exception as e:
             self.add_log(f"nError initializing Pioneer: {e}\n Trying again in 3 seconds...")
             self.after(3000, self.postinit())
@@ -158,19 +159,33 @@ class App(tk.Tk):
 
     def on_key_release(self, event):
         """Handle key release events."""
-        if self.pioneer_armed:
-            self.pioneer.send_rc_channels(channel_1=self.default_channels[0],
-                                          channel_2=self.default_channels[1],
-                                          channel_3=self.default_channels[2],
-                                          channel_4=self.default_channels[3],
-                                          channel_5=self.default_channels[4])
+        # if self.pioneer_armed:
+        #     self.pioneer.send_rc_channels(channel_1=self.default_channels[0],
+        #                                   channel_2=self.default_channels[1],
+        #                                   channel_3=self.default_channels[2],
+        #                                   channel_4=self.default_channels[3],
+        #                                   channel_5=self.default_channels[4])
         # key = event.keysym.lower()
+        pass
 
     def apply_settings(self):
         control_mode = self.control_mode.get()
         autopilot_mode = self.autopilot_mode.get()
         self.add_log(f"Settings Applied: Control Mode={control_mode}, Autopilot Mode={autopilot_mode}")
         self.logs_text.see("end")
+
+    def update_navbar(self):
+        """Fetch and update the navbar with drone data."""
+        try:
+            drone_connected = "Connected" if self.pioneer.connected() else "Disconnected"
+            camera_status = "On" if self.camera.connected else "Off"
+            battery_level = f"{self.pioneer.get_battery_status()} V"
+            self.label_drone_connection.config(text=f"Drone: {drone_connected}")
+            self.label_camera_connection.config(text=f"Camera: {camera_status}")
+            self.label_battery.config(text=f"Battery: {battery_level}")
+        except Exception as e:
+            self.add_log(f"Error updating navbar: {e}")
+        self.after(2000, self.update_navbar)
 
 
 def main():
