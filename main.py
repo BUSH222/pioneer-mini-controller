@@ -19,6 +19,11 @@ def resize_main_window(sender, app_data):
     dpg.set_item_height("Main Content", main_content_height)
 
 
+def update_sidebar_width(sender, app_data):
+    dpg.set_item_width("Sidebar", app_data)
+    dpg.set_item_width("Main Content", dpg.get_viewport_client_width() - app_data)
+
+
 def main():
     dpg.create_context()
 
@@ -44,7 +49,13 @@ def main():
                     dpg.add_text("Recording settings go here.")
 
                 with dpg.collapsing_header(label="UI", default_open=True):
-                    dpg.add_text("UI settings go here.")
+                    dpg.add_slider_int(
+                        label="Sidebar Width",
+                        default_value=200,
+                        min_value=100,
+                        max_value=400,
+                        callback=update_sidebar_width
+                    )
 
             # Main Content Area
             with dpg.child_window(width=800, height=500, tag="Main Content"):
