@@ -5,7 +5,9 @@ import math
 import asyncio
 import threading
 from helper import acw, start_background_loop
-
+import time
+import cv2
+import numpy as np
 
 threading.Thread(target=start_background_loop, daemon=True).start()
 
@@ -91,7 +93,7 @@ async def connect_to_drone(sender, app_data, user_data):
 
 
 async def connect_to_camera(sender, app_data, user_data):
-    global camera
+    global camera, video_running, pioneer
     if pioneer is None:
         dpg.set_item_label(sender, "Connect to Camera")
         print("Pioneer not connected. Cannot connect to camera.")
@@ -101,43 +103,28 @@ async def connect_to_camera(sender, app_data, user_data):
         await asyncio.sleep(0.5)
         if camera.connect():
             dpg.set_item_label(sender, "Disconnect from Camera")
+            video_running = True
+
+            def video_loop():
+                while video_running:
+                    raw_frame = camera.get_frame()
+                    if raw_frame is not None:
+                        frame = cv2.imdecode(np.frombuffer(raw_frame, dtype=np.uint8), cv2.IMREAD_COLOR)
+                        frame = cv2.resize(frame, (480, 320))
+                        frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGBA)
+                        float_data = frame.astype(np.float32) / 255.0
+                        dpg.set_value("camera_feed", float_data.flatten())
+                    time.sleep(0.03)
+            threading.Thread(target=video_loop, daemon=True).start()
+
         else:
             dpg.set_item_label(sender, "Connect to Camera")
             print("Failed to connect to camera.")
     else:
         dpg.set_item_label(sender, "Connect to Camera")
+        video_running = False
         camera.disconnect()
         camera = None
-
-
-async def toggle_video_stream(sender, app_data, user_data):
-    global video_running, camera, pioneer
-    if pioneer is None or camera is None:
-        print("No camera connected.")
-        return
-
-    if video_running:
-        video_running = False
-        
-        dpg.set_item_label(sender, "Start video stream")
-    else:
-        video_running = True
-        dpg.set_item_label(sender, "Stop video stream")
-
-        def video_loop():
-            import time
-            import cv2
-            import numpy as np
-            while video_running:
-                raw_frame = camera.get_frame()
-                if raw_frame is not None:
-                    frame = cv2.imdecode(np.frombuffer(raw_frame, dtype=np.uint8), cv2.IMREAD_COLOR)
-                    frame = cv2.resize(frame, (480, 320))
-                    frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGBA)
-                    float_data = frame.astype(np.float32) / 255.0
-                    dpg.set_value("camera_feed", float_data.flatten())
-                time.sleep(0.03)
-        threading.Thread(target=video_loop, daemon=True).start()
 
 
 def main():
@@ -156,7 +143,6 @@ def main():
                     dpg.add_text("Connection status goes here.")
                     dpg.add_button(label="Connect to Drone", callback=acw(connect_to_drone))
                     dpg.add_button(label="Connect to Camera", callback=acw(connect_to_camera))
-                    dpg.add_button(label="Start video stream", callback=acw(toggle_video_stream))
                 with dpg.collapsing_header(label="Control Window", default_open=True):
                     dpg.add_text("Control options go here.")
 
