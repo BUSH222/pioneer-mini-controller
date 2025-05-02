@@ -45,7 +45,6 @@ with dpg.texture_registry(show=True):
 
 def resize_main_window(sender, app_data):
     global sidebar_width
-    """Callback to resize the main window and its child elements when the viewport is resized."""
     width, height = dpg.get_viewport_client_width(), dpg.get_viewport_client_height()
     dpg.set_item_width("Main Window", width)
     dpg.set_item_height("Main Window", height)
@@ -133,7 +132,8 @@ def main():
         # Top Navbar
         with dpg.menu_bar():
             dpg.add_menu_item(label="Battery: ?? V")
-            dpg.add_menu_item(label="Warnings: None")
+            dpg.add_menu_item(label="Drone: disconnected")
+            dpg.add_menu_item(label="Camera: disconnected")
 
         # Horizontal layout for Sidebar and Main Content Area
         with dpg.group(horizontal=True):
