@@ -2,6 +2,12 @@ import dearpygui.dearpygui as dpg
 from pioneer_sdk import Pioneer, Camera
 import array
 import math
+import asyncio
+import threading
+from helper import acw, start_background_loop
+
+
+threading.Thread(target=start_background_loop, daemon=True).start()
 
 dpg.create_context()
 
@@ -13,8 +19,8 @@ print("Pioneer SDK initialized.")
 
 # Preload the camera feed
 texture_data = []
-for y in range(480):
-    for x in range(640):
+for y in range(320):
+    for x in range(480):
         r = (math.sin(x * 0.05) + 1) / 2
         g = (math.cos(y * 0.05) + 1) / 2
         b = (math.sin((x + y) * 0.02) + 1) / 2 
@@ -26,13 +32,12 @@ for y in range(480):
 raw_data = array.array('f', texture_data)
 with dpg.texture_registry(show=True):
     dpg.add_raw_texture(
-        width=640,
-        height=480,
+        width=480,
+        height=320,
         default_value=raw_data,
         tag="camera_feed",
         format=dpg.mvFormat_Float_rgba
     )
-
 
 def resize_main_window(sender, app_data):
     global sidebar_width
@@ -61,11 +66,22 @@ def save_sidebar_width(sender, app_data):
     dpg.set_item_width("Main Content", dpg.get_viewport_client_width() - sidebar_width)
 
 
-def connect_to_drone(sender, app_data):
+async def connect_to_drone(sender, app_data, user_data):
     global pioneer
     if pioneer is None:
         pioneer = Pioneer(logger=False, log_connection=False)
-        dpg.set_item_label(sender, "Disconnect from Drone")
+        await asyncio.sleep(0.1)
+        for i in range(10):
+            if not pioneer.connected():
+                await asyncio.sleep(0.2)
+                continue
+            else:
+                break
+        if not pioneer.connected():
+            dpg.set_item_label(sender, "Connect to Drone")
+            print("Failed to connect to drone.")
+        else:
+            dpg.set_item_label(sender, "Disconnect from Drone")
     else:
         dpg.set_item_label(sender, "Connect to Drone")
         pioneer.close_connection()
@@ -92,14 +108,13 @@ def main():
             dpg.add_menu_item(label="Battery: ?? V")
             dpg.add_menu_item(label="Warnings: None")
 
-
         # Horizontal layout for Sidebar and Main Content Area
         with dpg.group(horizontal=True):
             # Sidebar
             with dpg.child_window(width=300, height=500, tag="Sidebar"):
                 with dpg.collapsing_header(label="Connection Window", default_open=True):
                     dpg.add_text("Connection status goes here.")
-                    dpg.add_button(label="Connect to Drone", callback=connect_to_drone)
+                    dpg.add_button(label="Connect to Drone", callback=acw(connect_to_drone))
                     dpg.add_button(label="Connect to Camera", callback=connect_to_camera)
                 with dpg.collapsing_header(label="Control Window", default_open=True):
                     dpg.add_text("Control options go here.")
