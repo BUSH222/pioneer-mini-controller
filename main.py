@@ -23,7 +23,7 @@ for y in range(320):
     for x in range(480):
         r = (math.sin(x * 0.05) + 1) / 2
         g = (math.cos(y * 0.05) + 1) / 2
-        b = (math.sin((x + y) * 0.02) + 1) / 2 
+        b = (math.sin((x + y) * 0.02) + 1) / 2
         a = 1  # Fully opaque
         texture_data.append(r)
         texture_data.append(g)
@@ -38,6 +38,7 @@ with dpg.texture_registry(show=True):
         tag="camera_feed",
         format=dpg.mvFormat_Float_rgba
     )
+
 
 def resize_main_window(sender, app_data):
     global sidebar_width
@@ -88,12 +89,20 @@ async def connect_to_drone(sender, app_data, user_data):
         pioneer = None
 
 
-def connect_to_camera(sender, app_data):
+async def connect_to_camera(sender, app_data, user_data):
     global camera
+    if pioneer is None:
+        dpg.set_item_label(sender, "Connect to Camera")
+        print("Pioneer not connected. Cannot connect to camera.")
+        return
     if camera is None:
         camera = Camera(log_connection=False)
-        camera.connect()
-        dpg.set_item_label(sender, "Disconnect from Camera")
+        await asyncio.sleep(0.5)
+        if camera.connect():
+            dpg.set_item_label(sender, "Disconnect from Camera")
+        else:
+            dpg.set_item_label(sender, "Connect to Camera")
+            print("Failed to connect to camera.")
     else:
         dpg.set_item_label(sender, "Connect to Camera")
         camera.disconnect()
@@ -115,7 +124,7 @@ def main():
                 with dpg.collapsing_header(label="Connection Window", default_open=True):
                     dpg.add_text("Connection status goes here.")
                     dpg.add_button(label="Connect to Drone", callback=acw(connect_to_drone))
-                    dpg.add_button(label="Connect to Camera", callback=connect_to_camera)
+                    dpg.add_button(label="Connect to Camera", callback=acw(connect_to_camera))
                 with dpg.collapsing_header(label="Control Window", default_open=True):
                     dpg.add_text("Control options go here.")
 
