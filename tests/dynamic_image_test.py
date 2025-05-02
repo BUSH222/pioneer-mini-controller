@@ -1,5 +1,6 @@
 import dearpygui.dearpygui as dpg
 from PIL import Image
+import time
 
 
 image_path = "assets/camera_off.png"
@@ -20,4 +21,5 @@ dpg.create_viewport(title="nkfdjsabdh", width=width+40, height=height+60)
 dpg.setup_dearpygui()
 dpg.show_viewport()
 dpg.start_dearpygui()
+time.sleep(10)
 dpg.destroy_context()
