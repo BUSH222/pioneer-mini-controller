@@ -48,9 +48,9 @@ def resize_main_window(sender, app_data):
     width, height = dpg.get_viewport_client_width(), dpg.get_viewport_client_height()
     dpg.set_item_width("Main Window", width)
     dpg.set_item_height("Main Window", height)
-    sidebar_height = height - 30
-    main_content_width = width - sidebar_width
-    main_content_height = height - 30
+    sidebar_height = height - 55
+    main_content_width = width - sidebar_width - 25
+    main_content_height = height - 55
 
     dpg.set_item_width("Sidebar", sidebar_width)
     dpg.set_item_height("Sidebar", sidebar_height)
@@ -126,6 +126,19 @@ async def connect_to_camera(sender, app_data, user_data):
         camera = None
 
 
+async def set_led(sender, app_data, user_data):
+    if pioneer is None:
+        print("Pioneer not connected. Cannot set LEDs.")
+        return
+    for i in range(4):
+        rgb = dpg.get_value(f"led_{i}")
+        r, g, b = [int(c) for c in rgb[:3]]
+        if (r, g, b) == (1, 1, 1):
+            r, g, b = 0, 0, 0
+        if not pioneer.led_control(led_id=i, r=r, g=g, b=b):
+            print(f"Failed to change LED {i} to {(r, g, b)}")
+
+
 def main():
     with dpg.window(label="Main Window", tag="Main Window",
                     no_move=True, no_resize=True, no_collapse=True, no_close=True, no_scrollbar=True):
@@ -138,18 +151,37 @@ def main():
         # Horizontal layout for Sidebar and Main Content Area
         with dpg.group(horizontal=True):
             # Sidebar
-            with dpg.child_window(width=300, height=500, tag="Sidebar"):
+            with dpg.child_window(width=300, tag="Sidebar"):
                 with dpg.collapsing_header(label="Connection Window", default_open=True):
                     dpg.add_text("Connection status goes here.")
                     dpg.add_button(label="Connect to Drone", callback=acw(connect_to_drone))
                     dpg.add_button(label="Connect to Camera", callback=acw(connect_to_camera))
-                with dpg.collapsing_header(label="Control Window", default_open=True):
+                with dpg.collapsing_header(label="Control Window", default_open=False):
                     dpg.add_text("Control options go here.")
 
-                with dpg.collapsing_header(label="Record Window", default_open=True):
+                with dpg.collapsing_header(label="Record Window", default_open=False):
                     dpg.add_text("Recording settings go here.")
+                
+                with dpg.collapsing_header(label="LED Control", default_open=False):
+                    dpg.add_color_picker(label="LED 0", tag="led_0",
+                                         default_value=(1.0, 1.0, 1.0, 1.0),
+                                         no_alpha=True,
+                                         picker_mode=dpg.mvColorPicker_wheel)
+                    dpg.add_color_picker(label="LED 1", tag="led_1",
+                                         default_value=(1.0, 1.0, 1.0, 1.0),
+                                         no_alpha=True,
+                                         picker_mode=dpg.mvColorPicker_wheel)
+                    dpg.add_color_picker(label="LED 2", tag="led_2",
+                                         default_value=(1.0, 1.0, 1.0, 1.0),
+                                         no_alpha=True,
+                                         picker_mode=dpg.mvColorPicker_wheel)
+                    dpg.add_color_picker(label="LED 3", tag="led_3",
+                                         default_value=(1.0, 1.0, 1.0, 1.0),
+                                         no_alpha=True,
+                                         picker_mode=dpg.mvColorPicker_wheel)
+                    dpg.add_button(label="Set LEDs", callback=acw(set_led))
 
-                with dpg.collapsing_header(label="UI", default_open=True):
+                with dpg.collapsing_header(label="UI", default_open=False):
                     dpg.add_slider_int(
                         label="Sidebar Width",
                         default_value=300,
@@ -165,10 +197,10 @@ def main():
                 dpg.add_image("camera_feed")
 
     dpg.create_viewport(title="Drone Flight Control", width=1000, height=600)
-    resize_main_window(None, None)
     dpg.set_viewport_resize_callback(resize_main_window)
     dpg.setup_dearpygui()
     dpg.show_viewport()
+    resize_main_window(None, None)
     dpg.start_dearpygui()
     dpg.destroy_context()
 
