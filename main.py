@@ -1,10 +1,12 @@
 import dearpygui.dearpygui as dpg
 from pioneer_sdk import Pioneer, Camera
-import array
-import math
 import asyncio
 import threading
-from helper import acw, start_background_loop
+from core.helper import acw, start_background_loop
+from ui.layout import (preload_camera_feed,
+                       resize_main_window,
+                       update_sidebar_width,
+                       save_sidebar_width)
 import time
 import cv2
 import numpy as np
@@ -13,60 +15,14 @@ threading.Thread(target=start_background_loop, daemon=True).start()
 
 dpg.create_context()
 
-sidebar_width = 300
+
 pioneer = None
 camera = None
 video_running = False
 print("Pioneer SDK initialized.")
 
-
 # Preload the camera feed
-texture_data = []
-for y in range(320):
-    for x in range(480):
-        r = (math.sin(x * 0.05) + 1) / 2
-        g = (math.cos(y * 0.05) + 1) / 2
-        b = (math.sin((x + y) * 0.02) + 1) / 2
-        a = 1  # Fully opaque
-        texture_data.append(r)
-        texture_data.append(g)
-        texture_data.append(b)
-        texture_data.append(a)
-raw_data = array.array('f', texture_data)
-with dpg.texture_registry(show=True):
-    dpg.add_raw_texture(
-        width=480,
-        height=320,
-        default_value=raw_data,
-        tag="camera_feed",
-        format=dpg.mvFormat_Float_rgba
-    )
-
-
-def resize_main_window(sender, app_data):
-    global sidebar_width
-    width, height = dpg.get_viewport_client_width(), dpg.get_viewport_client_height()
-    dpg.set_item_width("Main Window", width)
-    dpg.set_item_height("Main Window", height)
-    sidebar_height = height - 55
-    main_content_width = width - sidebar_width - 25
-    main_content_height = height - 55
-
-    dpg.set_item_width("Sidebar", sidebar_width)
-    dpg.set_item_height("Sidebar", sidebar_height)
-    dpg.set_item_width("Main Content", main_content_width)
-    dpg.set_item_height("Main Content", main_content_height)
-
-
-def update_sidebar_width(sender, app_data):
-    global sidebar_width
-    sidebar_width = app_data
-
-
-def save_sidebar_width(sender, app_data):
-    global sidebar_width
-    dpg.set_item_width("Sidebar", sidebar_width)
-    dpg.set_item_width("Main Content", dpg.get_viewport_client_width() - sidebar_width)
+preload_camera_feed()
 
 
 async def connect_to_drone(sender, app_data, user_data):
