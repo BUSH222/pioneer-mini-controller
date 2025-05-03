@@ -1,8 +1,9 @@
 import dearpygui.dearpygui as dpg
 import time
-from core.app_state import AppState
 import math
 import array
+
+from core.app_state import AppState
 
 
 def preload_camera_feed():

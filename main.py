@@ -1,7 +1,8 @@
 import dearpygui.dearpygui as dpg
 import threading
+
 from core.helper import start_background_loop
-from ui.resize import (resize_main_window)
+from ui.resize import resize_main_window
 from ui.misc import update_menubar, preload_camera_feed
 from ui.layout import draw_layout
 
