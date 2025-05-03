@@ -84,7 +84,14 @@ async def connect_to_drone(sender, app_data, user_data):
             dpg.set_item_label(sender, "Connect to Drone")
             print("Failed to connect to drone.")
         else:
+            warn = pioneer.get_preflight_state()
             dpg.set_item_label(sender, "Disconnect from Drone")
+            preflight_state_str = '\n'.join([f'{key}: {value}' for key, value in warn.items() if value is not None])
+            if all(x is None for x in warn.values()):
+                dpg.set_value("drone_preflight_logs", "No warnings! Everything is OK.")
+            else:
+                dpg.set_value("drone_preflight_logs", preflight_state_str)
+
     else:
         dpg.set_item_label(sender, "Connect to Drone")
         pioneer.close_connection()
@@ -139,21 +146,39 @@ async def set_led(sender, app_data, user_data):
             print(f"Failed to change LED {i} to {(r, g, b)}")
 
 
+def update_pioneer_status():
+    global pioneer, camera
+    while True:
+        if pioneer is not None and pioneer.connected():
+            dpg.set_item_label("drone_status_menubar", "Drone: connected")
+            if camera is None:
+                dpg.set_item_label("camera_status_menubar", "Camera: disconnected")
+            else:
+                dpg.set_item_label("camera_status_menubar", "Camera: connected")
+            battery = pioneer.get_battery_status(get_last_received=True)
+            if battery is not None:
+                dpg.set_item_label("battery_status_menubar", f"Battery: {battery:.2f} V")
+        else:
+            dpg.set_item_label("drone_status_menubar", "Drone: disconnected")
+            dpg.set_item_label("camera_status_menubar", "Camera: disconnected")
+        time.sleep(5)
+
+
 def main():
     with dpg.window(label="Main Window", tag="Main Window",
                     no_move=True, no_resize=True, no_collapse=True, no_close=True, no_scrollbar=True):
         # Top Navbar
         with dpg.menu_bar():
-            dpg.add_menu_item(label="Battery: ?? V")
-            dpg.add_menu_item(label="Drone: disconnected")
-            dpg.add_menu_item(label="Camera: disconnected")
+            dpg.add_menu_item(label="Battery: ?? V", tag="battery_status_menubar")
+            dpg.add_menu_item(label="Drone: disconnected", tag="drone_status_menubar")
+            dpg.add_menu_item(label="Camera: disconnected", tag="camera_status_menubar")
 
         # Horizontal layout for Sidebar and Main Content Area
         with dpg.group(horizontal=True):
             # Sidebar
             with dpg.child_window(width=300, tag="Sidebar"):
                 with dpg.collapsing_header(label="Connection Window", default_open=True):
-                    dpg.add_text("Connection status goes here.")
+                    dpg.add_text("No warnings to display", tag="drone_preflight_logs")
                     dpg.add_button(label="Connect to Drone", callback=acw(connect_to_drone))
                     dpg.add_button(label="Connect to Camera", callback=acw(connect_to_camera))
                 with dpg.collapsing_header(label="Control Window", default_open=False):
@@ -161,7 +186,7 @@ def main():
 
                 with dpg.collapsing_header(label="Record Window", default_open=False):
                     dpg.add_text("Recording settings go here.")
-                
+
                 with dpg.collapsing_header(label="LED Control", default_open=False):
                     dpg.add_color_picker(label="LED 0", tag="led_0",
                                          default_value=(1.0, 1.0, 1.0, 1.0),
@@ -195,6 +220,9 @@ def main():
             # Main Content Area
             with dpg.child_window(width=800, height=500, tag="Main Content"):
                 dpg.add_image("camera_feed")
+
+    # Background threads:
+    threading.Thread(target=update_pioneer_status, daemon=True).start()
 
     dpg.create_viewport(title="Drone Flight Control", width=1000, height=600)
     dpg.set_viewport_resize_callback(resize_main_window)
