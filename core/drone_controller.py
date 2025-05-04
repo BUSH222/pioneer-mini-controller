@@ -1,6 +1,7 @@
 import asyncio
 from pioneer_sdk import Pioneer
 import dearpygui.dearpygui as dpg
+import time
 
 from .app_state import AppState
 from .pioneer_extensions import send_manual_control
@@ -67,3 +68,21 @@ async def toggle_arm(sender, app_data, user_data):
         app.pioneer.disarm()
         dpg.set_item_label("toggle_arm", "Arm propellers")
 
+
+def control_mainloop():
+    app = AppState()
+    while True:
+        if app.pioneer is not None and app.pioneer.connected():
+            rc_controls = app.rc_controls
+            throttle = app.throttle
+            try:
+                app.pioneer.send_manual_control(
+                    x=rc_controls[0],  # Pitch
+                    y=rc_controls[1],  # Roll
+                    z=throttle,        # Throttle
+                    r=rc_controls[2],  # Yaw
+                    buttons=0          # No buttons pressed
+                )
+            except Exception as e:
+                print(f"Failed to send manual control: {e}")
+        time.sleep(0.1)
