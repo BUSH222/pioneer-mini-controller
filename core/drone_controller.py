@@ -3,6 +3,9 @@ from pioneer_sdk import Pioneer
 import dearpygui.dearpygui as dpg
 
 from .app_state import AppState
+from .pioneer_extensions import send_manual_control
+
+Pioneer.send_manual_control = send_manual_control
 
 
 async def connect_to_drone(sender, app_data, user_data):
@@ -63,3 +66,4 @@ async def toggle_arm(sender, app_data, user_data):
     else:
         app.pioneer.disarm()
         dpg.set_item_label("toggle_arm", "Arm propellers")
+

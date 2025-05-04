@@ -9,6 +9,8 @@ class AppState:
             cls._instance._video_running = False
             cls._instance._sidebar_width = 300
             cls._instance._background_loop = None
+            cls._instance._rc_controls = [0, 0, 0]
+            cls._instance._throttle = 0
         return cls._instance
 
     @property
@@ -50,3 +52,19 @@ class AppState:
     @background_loop.setter
     def background_loop(self, value):
         self._background_loop = value
+    
+    @property
+    def rc_controls(self):
+        return self._rc_controls
+
+    @rc_controls.setter
+    def rc_controls(self, value):
+        self._rc_controls = value
+    
+    @property
+    def throttle(self):
+        return self._throttle
+
+    @throttle.setter
+    def throttle(self, value):
+        self._throttle = value
