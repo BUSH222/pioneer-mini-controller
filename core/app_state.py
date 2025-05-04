@@ -7,6 +7,8 @@ class AppState:
             cls._instance._pioneer = None
             cls._instance._camera = None
             cls._instance._video_running = False
+            cls._instance._sidebar_width = 300
+            cls._instance.background_loop = None
         return cls._instance
 
     @property
@@ -32,3 +34,19 @@ class AppState:
     @video_running.setter
     def video_running(self, value):
         self._video_running = value
+
+    @property
+    def sidebar_width(self):
+        return self._sidebar_width
+
+    @sidebar_width.setter
+    def sidebar_width(self, value):
+        self.sidebar_width = value
+
+    @property
+    def background_loop(self):
+        return self._background_loop
+
+    @background_loop.setter
+    def background_loop(self, value):
+        self._background_loop = value

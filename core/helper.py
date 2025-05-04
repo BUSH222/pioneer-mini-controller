@@ -1,21 +1,20 @@
 import asyncio
-
-background_loop = None
+from core.app_state import AppState
 
 
 def start_background_loop():
-    global background_loop
+    app = AppState()
     loop = asyncio.new_event_loop()
-    background_loop = loop
+    app.background_loop = loop
     asyncio.set_event_loop(loop)
     loop.run_forever()
 
 
 def run_async(coro):
-    global background_loop
-    while background_loop is None:
+    app = AppState()
+    while app.background_loop is None:
         pass
-    asyncio.run_coroutine_threadsafe(coro, background_loop)
+    asyncio.run_coroutine_threadsafe(coro, app.background_loop)
 
 
 def acw(async_func):
