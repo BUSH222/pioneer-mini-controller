@@ -1,7 +1,7 @@
 import dearpygui.dearpygui as dpg
 
 from core.helper import acw
-from core.drone_controller import connect_to_drone, set_led
+from core.drone_controller import connect_to_drone, set_led, toggle_arm
 from core.camera_controller import connect_to_camera
 from ui.resize import update_sidebar_width, save_sidebar_width
 
@@ -14,6 +14,7 @@ def draw_layout():
             dpg.add_menu_item(label="Battery: ?? V", tag="battery_status_menubar")
             dpg.add_menu_item(label="Drone: disconnected", tag="drone_status_menubar")
             dpg.add_menu_item(label="Camera: disconnected", tag="camera_status_menubar")
+            dpg.add_menu_item(label="Autopilot state: OFFLINE", tag="autopilot_state_menubar")
 
         # Horizontal layout for Sidebar and Main Content Area
         with dpg.group(horizontal=True):
@@ -24,6 +25,7 @@ def draw_layout():
                     dpg.add_button(label="Connect to Drone", callback=acw(connect_to_drone))
                     dpg.add_button(label="Connect to Camera", callback=acw(connect_to_camera))
                 with dpg.collapsing_header(label="Control Window", default_open=False):
+                    dpg.add_button(label="Arm propellers", tag="toggle_arm", callback=acw(toggle_arm))
                     dpg.add_text("Control options go here.")
 
                 with dpg.collapsing_header(label="Record Window", default_open=False):

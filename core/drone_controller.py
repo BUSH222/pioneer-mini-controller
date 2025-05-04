@@ -46,3 +46,20 @@ async def set_led(sender, app_data, user_data):
             r, g, b = 0, 0, 0
         if not app.pioneer.led_control(led_id=i, r=r, g=g, b=b):
             print(f"Failed to change LED {i} to {(r, g, b)}")
+
+
+async def toggle_arm(sender, app_data, user_data):
+    app = AppState()
+    if app.pioneer is None:
+        print("Pioneer not connected. Cannot arm.")
+        return
+    autopilot_state = app.pioneer.get_autopilot_state()
+    if autopilot_state is None:
+        print("Failed to get autopilot state.")
+        return
+    if autopilot_state == 'IDLE':
+        app.pioneer.arm()
+        dpg.set_item_label("toggle_arm", "Disarm propellers")
+    else:
+        app.pioneer.disarm()
+        dpg.set_item_label("toggle_arm", "Arm propellers")

@@ -41,7 +41,16 @@ def update_menubar():
             battery = app.pioneer.get_battery_status(get_last_received=True)
             if battery is not None:
                 dpg.set_item_label("battery_status_menubar", f"Battery: {battery:.2f} V")
+            autopilot_state = app.pioneer.get_autopilot_state()
+            if autopilot_state is None:
+                dpg.set_item_label("autopilot_state_menubar", "Autopilot state: OFFLINE")
+            else:
+                dpg.set_item_label("autopilot_state_menubar", f"Autopilot state: {autopilot_state}")
+            if autopilot_state is None or autopilot_state == 'IDLE':
+                dpg.set_item_label("toggle_arm", "Arm propellers")
+
         else:
             dpg.set_item_label("drone_status_menubar", "Drone: disconnected")
             dpg.set_item_label("camera_status_menubar", "Camera: disconnected")
-        time.sleep(5)
+            dpg.set_item_label("autopilot_state_menubar", "Autopilot state: OFFLINE")
+        time.sleep(2)
