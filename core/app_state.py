@@ -10,7 +10,7 @@ class AppState:
             cls._instance._sidebar_width = 300
             cls._instance._background_loop = None
             cls._instance._rc_controls = [0, 0, 0]
-            cls._instance._throttle = 0
+            cls._instance._throttle = 450
         return cls._instance
 
     @property
