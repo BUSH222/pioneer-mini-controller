@@ -73,16 +73,36 @@ def control_mainloop():
     app = AppState()
     while True:
         if app.pioneer is not None and app.pioneer.connected():
-            rc_controls = app.rc_controls
-            throttle = app.throttle
-            try:
-                app.pioneer.send_manual_control(
-                    x=rc_controls[0],  # Pitch
-                    y=rc_controls[1],  # Roll
-                    z=throttle,        # Throttle
-                    r=rc_controls[2],  # Yaw
-                    buttons=0          # No buttons pressed
-                )
-            except Exception as e:
-                print(f"Failed to send manual control: {e}")
+            if app.control_mode == 'manual':
+                rc_controls = app.rc_controls
+                throttle = app.throttle
+                try:
+                    app.pioneer.send_manual_control(
+                        x=rc_controls[0],  # Pitch
+                        y=rc_controls[1],  # Roll
+                        z=throttle,        # Throttle
+                        r=rc_controls[2],  # Yaw
+                        buttons=0          # No buttons pressed
+                    )
+                except Exception as e:
+                    print(f"Failed to send manual control: {e}")
+            elif app.control_mode == 'stab':
+                velocities = app.stab_velocities
+                try:
+                    app.pioneer.set_manual_speed(*velocities)
+                except Exception as e:
+                    print(f"Failed to send manual control: {e}")
         time.sleep(0.1)
+
+
+async def takeoff(sender, app_data, user_data):
+    app = AppState()
+    if app.control_mode == 'manual':
+        app.throttle = 450
+    elif app.control_mode == 'stab':
+        app.pioneer.takeoff()
+
+
+async def land(sender, app_data, user_data):
+    app = AppState()
+    app.pioneer.land()

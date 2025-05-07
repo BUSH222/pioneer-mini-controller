@@ -1,7 +1,7 @@
 import dearpygui.dearpygui as dpg
 
-from core.helper import acw
-from core.drone_controller import connect_to_drone, set_led, toggle_arm
+from core.helper import acw, set_control_mode
+from core.drone_controller import connect_to_drone, set_led, toggle_arm, takeoff, land
 from core.camera_controller import connect_to_camera, take_picture, toggle_video_recording
 from ui.resize import update_sidebar_width, save_sidebar_width
 
@@ -26,13 +26,20 @@ def draw_layout():
                     dpg.add_button(label="Connect to Camera", callback=acw(connect_to_camera))
                 with dpg.collapsing_header(label="Control Window", default_open=False):
                     dpg.add_button(label="Arm propellers", tag="toggle_arm", callback=acw(toggle_arm))
-                    dpg.add_text("Control options go here.")
+                    dpg.add_button(label="Take off", tag="takeoff", callback=acw(takeoff))
+                    dpg.add_button(label="Land", tag="land", callback=acw(land))
+                    dpg.add_text("Control mode")
+                    dpg.add_radio_button(
+                        items=["Manual", "Stabilize"],
+                        tag="control_mode_radio_button",
+                        default_value="Manual",
+                        callback=set_control_mode
+                    )
 
                 with dpg.collapsing_header(label="Record Window", default_open=False):
                     dpg.add_button(label="Take picture", tag="take_picture", callback=acw(take_picture))
                     dpg.add_button(label="Start video recording", tag="toggle_recording",
                                    callback=acw(toggle_video_recording))
-                    dpg.add_text("Recording settings go here.")
 
                 with dpg.collapsing_header(label="LED Control", default_open=False):
                     dpg.add_color_picker(label="LED 0", tag="led_0",
@@ -63,6 +70,9 @@ def draw_layout():
                     )
 
                     dpg.add_button(label="Apply", callback=save_sidebar_width)
+
+                with dpg.collapsing_header(label="Script control", default_open=False):
+                    dpg.add_text("lua script settings go here.")
 
             # Main Content Area
             with dpg.child_window(width=800, height=500, tag="Main Content"):

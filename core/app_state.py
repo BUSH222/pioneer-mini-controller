@@ -10,8 +10,10 @@ class AppState:
             cls._instance._sidebar_width = 300
             cls._instance._background_loop = None
             cls._instance._rc_controls = [0, 0, 0]
-            cls._instance._throttle = 450
-            cls._instance._video_recording = False
+            cls._instance._throttle = 100  # drone is in ground effect at around 450
+            cls._instance._video_recording = False  # record onto the SD card
+            cls._instance._control_mode = 'manual'  # manual or stab
+            cls._instance._stab_velocities = [0, 0, 0, 0]  # vx, vy, vz, yaw_rate
         return cls._instance
 
     @property
@@ -77,3 +79,19 @@ class AppState:
     @video_recording.setter
     def video_recording(self, value):
         self._video_recording = value
+
+    @property
+    def control_mode(self):
+        return self._control_mode
+
+    @control_mode.setter
+    def control_mode(self, value):
+        self._control_mode = value
+
+    @property
+    def stab_velocities(self):
+        return self._stab_velocities
+
+    @stab_velocities.setter
+    def stab_velocities(self, value):
+        self._stab_velocities = value

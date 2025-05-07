@@ -7,12 +7,21 @@ def handle_key_input():
     app = AppState()
 
     def update_throttle(delta):
-        app.throttle = max(0, min(1000, app.throttle + delta))  # Clamp throttle between 0 and 1000
-        print(f"Throttle updated: {app.throttle}")
+        if app.control_mode == 'manual':
+            app.throttle = max(0, min(1000, app.throttle + delta))  # Clamp throttle between 0 and 1000
+            print(f"Throttle updated: {app.throttle}")
+        elif app.control_mode == 'stab':
+            app.stab_velocities[2] += delta / 100  # 0.5 m/s
 
     def update_rc_controls(index, value):
-        app.rc_controls[index] = value
-        print(f"RC Controls updated: {app.rc_controls}")
+        if app.control_mode == 'manual':
+            app.rc_controls[index] = value
+            print(f"RC Controls updated: {app.rc_controls}")
+        elif app.control_mode == 'stab':
+            if index in [0, 1]:
+                app.stab_velocities[index] = value / 1000
+            elif index == 2:
+                app.stab_velocities[3] = value / 1000
 
     with dpg.handler_registry():
         # Throttle controls
