@@ -2,7 +2,7 @@ import dearpygui.dearpygui as dpg
 
 from core.helper import acw
 from core.drone_controller import connect_to_drone, set_led, toggle_arm
-from core.camera_controller import connect_to_camera
+from core.camera_controller import connect_to_camera, take_picture, toggle_video_recording
 from ui.resize import update_sidebar_width, save_sidebar_width
 
 
@@ -29,6 +29,9 @@ def draw_layout():
                     dpg.add_text("Control options go here.")
 
                 with dpg.collapsing_header(label="Record Window", default_open=False):
+                    dpg.add_button(label="Take picture", tag="take_picture", callback=acw(take_picture))
+                    dpg.add_button(label="Start video recording", tag="toggle_recording",
+                                   callback=acw(toggle_video_recording))
                     dpg.add_text("Recording settings go here.")
 
                 with dpg.collapsing_header(label="LED Control", default_open=False):

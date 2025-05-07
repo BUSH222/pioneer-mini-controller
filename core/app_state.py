@@ -11,6 +11,7 @@ class AppState:
             cls._instance._background_loop = None
             cls._instance._rc_controls = [0, 0, 0]
             cls._instance._throttle = 450
+            cls._instance._video_recording = False
         return cls._instance
 
     @property
@@ -68,3 +69,11 @@ class AppState:
     @throttle.setter
     def throttle(self, value):
         self._throttle = value
+
+    @property
+    def video_recording(self):
+        return self._video_recording
+
+    @video_recording.setter
+    def video_recording(self, value):
+        self._video_recording = value

@@ -5,8 +5,10 @@ from pioneer_sdk import Camera
 import numpy as np
 import time
 import threading
+import requests
 
 from .app_state import AppState
+from .helper import generate_filename
 
 
 async def connect_to_camera(sender, app_data, user_data):
@@ -42,3 +44,40 @@ async def connect_to_camera(sender, app_data, user_data):
         app.video_running = False
         app.camera.disconnect()
         app.camera = None
+
+
+async def take_picture(sender, app_data, user_data):
+    app = AppState()
+    if app.pioneer is None:
+        print("Pioneer not connected. Cannot take a picture.")
+        return
+    filename = generate_filename()
+    data = requests.get(f'http://192.168.4.1/control?function=photo&name={filename}')
+    print(data.json())
+    return True
+
+
+async def toggle_video_recording(sender, app_data, user_data):
+    app = AppState()
+    if app.pioneer is None:
+        print("Pioneer not connected. Cannot take a picture.")
+        return
+    if not app.video_recording:
+        filename = generate_filename()
+        data = requests.get(f'http://192.168.4.1/control?function=video_record&command=start&name={filename}')
+        print(data.json())
+        if not data.json()['success']:
+            print('Something went wrong')
+            return
+        else:
+            dpg.set_item_label(sender, "Stop video recording")
+            app.video_recording = True
+    else:
+        data = requests.get('http://192.168.4.1/control?function=video_record&command=stop')
+        print(data.json())
+        if not data.json()['success']:
+            print('Something went wrong')
+            return
+        else:
+            dpg.set_item_label(sender, "Start video recording")
+            app.video_recording = False
