@@ -29,7 +29,7 @@ def acw(async_func):
 def generate_filename():
     letters = ''.join(random.choices(string.ascii_uppercase, k=2))
     time_str = datetime.now().strftime("%H%M%S")
-    return letters + time_str
+    return time_str + letters
 
 
 async def set_control_mode(sender, app_data, user_data):
