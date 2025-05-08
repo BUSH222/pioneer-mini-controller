@@ -4,9 +4,9 @@ import dearpygui.dearpygui as dpg
 
 def handle_key_input():
     """Handles key inputs for throttle and RC controls."""
-    app = AppState()
 
     def update_throttle(delta):
+        app = AppState()
         if app.control_mode == 'manual':
             app.throttle = max(0, min(1000, app.throttle + delta))  # Clamp throttle between 0 and 1000
             print(f"Throttle updated: {app.throttle}")
@@ -14,14 +14,15 @@ def handle_key_input():
             app.stab_velocities[2] += delta / 100  # 0.5 m/s
 
     def update_rc_controls(index, value):
+        app = AppState()
         if app.control_mode == 'manual':
             app.rc_controls[index] = value
             print(f"RC Controls updated: {app.rc_controls}")
         elif app.control_mode == 'stab':
             if index in [0, 1]:
-                app.stab_velocities[index] = value / 1000
+                app.stab_velocities[index] = -value / 500
             elif index == 2:
-                app.stab_velocities[3] = value / 1000
+                app.stab_velocities[3] = value / 500
 
     with dpg.handler_registry():
         # Throttle controls

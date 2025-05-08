@@ -88,6 +88,7 @@ def control_mainloop():
                     print(f"Failed to send manual control: {e}")
             elif app.control_mode == 'stab':
                 velocities = app.stab_velocities
+                print(velocities)
                 try:
                     app.pioneer.set_manual_speed(*velocities)
                 except Exception as e:
@@ -97,9 +98,8 @@ def control_mainloop():
 
 async def takeoff(sender, app_data, user_data):
     app = AppState()
-    if app.control_mode == 'manual':
-        app.throttle = 450
-    elif app.control_mode == 'stab':
+    app.throttle = 450
+    if app.control_mode == 'stab':
         app.pioneer.takeoff()
 
 

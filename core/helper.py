@@ -32,8 +32,9 @@ def generate_filename():
     return time_str + letters
 
 
-async def set_control_mode(sender, app_data, user_data):
+def set_control_mode(sender, app_data, user_data):
     app = AppState()
+    print(app_data)
     if app_data == 'Manual':
         app.control_mode = 'manual'
     elif app_data == 'Stabilize':
