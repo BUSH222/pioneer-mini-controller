@@ -22,7 +22,7 @@ def handle_key_input():
             if index in [0, 1]:
                 app.stab_velocities[index] = -value / 500
             elif index == 2:
-                app.stab_velocities[3] = value / 500
+                app.stab_velocities[3] = -value / 500
 
     with dpg.handler_registry():
         # Throttle controls
