@@ -49,6 +49,11 @@ def update_menubar():
             if autopilot_state is None or autopilot_state == 'IDLE':
                 dpg.set_item_label("toggle_arm", "Arm propellers")
 
+            altitude = app.pioneer.get_dist_sensor_data(get_last_received=True) or 0
+            lps = app.pioneer.get_local_position_lps(get_last_received=True) or [0.0, 0.0, 0.0]
+            lps = ', '.join([str(round(x, 2)) for x in lps])
+            dpg.set_item_label("altitude_menubar", f"Altitude: {altitude}")
+            dpg.set_item_label("LPS_menubar", f"LPS: {lps}")
         else:
             dpg.set_item_label("drone_status_menubar", "Drone: disconnected")
             dpg.set_item_label("camera_status_menubar", "Camera: disconnected")

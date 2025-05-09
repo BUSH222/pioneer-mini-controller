@@ -15,6 +15,8 @@ def draw_layout():
             dpg.add_menu_item(label="Drone: disconnected", tag="drone_status_menubar")
             dpg.add_menu_item(label="Camera: disconnected", tag="camera_status_menubar")
             dpg.add_menu_item(label="Autopilot state: OFFLINE", tag="autopilot_state_menubar")
+            dpg.add_menu_item(label="Altitude: ?? m", tag="altitude_menubar")
+            dpg.add_menu_item(label="LPS: ?, ?, ?", tag="LPS_menubar")
 
         # Horizontal layout for Sidebar and Main Content Area
         with dpg.group(horizontal=True):
