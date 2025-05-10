@@ -8,8 +8,24 @@ This repository contains a program to control geoscan's pioneer mini drone, writ
 - [Features](#features)
 - [Installation Instructions](#installation-instructions)
 - [How to Use](#how-to-use)
+  - [Connection](#connection)
+  - [Arm Your Drone's Propellers](#arm-your-drones-propellers)
+  - [Take Off](#take-off)
+  - [Taking Videos/Photos Mid-Flight](#taking-videosphotos-mid-flight)
+  - [LED Control](#led-control)
+  - [UI Control](#ui-control)
+  - [Script Control](#script-control)
+  - [Navbar](#navbar)
+- [Code Structure](#code-structure)
+  - [Core](#core)
+  - [UI](#ui)
+  - [main.py](#mainpy)
+  - [misc](#misc)
 - [Contributing Guidelines](#contributing-guidelines)
-
+  - [Reporting Issues](#reporting-issues)
+  - [Submitting Pull Requests](#submitting-pull-requests)
+  - [Coding Standards](#coding-standards)
+- [License](#license)
 ## Features
 
 - **Drone Connection**: Connect to the Pioneer Mini drone and monitor its status.
@@ -105,27 +121,31 @@ Before launching the application, ensure that you are connected to the drone's W
     - LPS: Shows the X Y Z position of the drone using dead reckoning. Can be inaccurate on long flights.
 
 ## Code structure
-The code is divided into 2 packages (core and ui) and the main.py file
-**Core**
-This package contains the basic functionality to control the drone
-    - app_state.py contains the current state of flight. It features a singleton class AppState.
-    - camera_controller.py contains the logic for displaying the live video feed, as well as recording video and taking pictures
-    - drone_controller.py contains everything needed to control the drone. connect_to_drone connects the application to the drone, set_led updates the drone's LEDs, toggle_arm arms and disarms the drone's propellers, takeoff and land make the drone take off and land (currently buggy, will fix later), control_mainloop is a function that controls the drone's flight in a separate thread.
-    - helper.py contains some functions for helping the app run. It features asynchronous wrappers, the filename generation function for recording video and taking pictures, and set_control_mode function for toggling between manual and stabilized control.
-    - pioneer_extensions contains a monkey patch to pioneer_sdk's Pioneer class for manual control.
-**UI**
-This package deals with the app's interface.
-    - input_handlers.py contains the handle_key_input function, which maps the key presses to the appropriate drone controls.
-    - layout.py contains the draw_layout which draws everything on screen.
-    - misc.py contains the preload_camera_feed function, which fills the camera view with dummy data on startup (the fancy pattern you see), and the update_menubar function, which updates the menu bar periodically in a separate thread.
-    - resize.py contains the logic to resize the navbar, as well as the screen.
+The code is divided into 2 packages (core and ui) and the main.py file.
+### Core
+This package contains the basic functionality to control the drone:
+- app_state.py contains the current state of flight. It features a singleton class AppState.
+- camera_controller.py contains the logic for displaying the live video feed, as well as recording video and taking pictures
+- drone_controller.py contains everything needed to control the drone. connect_to_drone connects the application to the drone, set_led updates the drone's LEDs, toggle_arm arms and disarms the drone's propellers, takeoff and land make the drone take off and land (currently buggy, will fix later), control_mainloop is a function that controls the drone's flight in a separate thread.
+- helper.py contains some functions for helping the app run. It features asynchronous wrappers, the filename generation function for recording video and taking pictures, and set_control_mode function for toggling between manual and stabilized control.
+- pioneer_extensions contains a monkey patch to pioneer_sdk's Pioneer class for manual control.
 
-**main.py**
+### UI
+This package deals with the app's interface.
+- input_handlers.py contains the handle_key_input function, which maps the key presses to the appropriate drone controls.
+- layout.py contains the draw_layout which draws everything on screen.
+- misc.py contains the preload_camera_feed function, which fills the camera view with dummy data on startup (the fancy pattern you see), and the update_menubar function, which updates the menu bar periodically in a separate thread.
+- resize.py contains the logic to resize the navbar, as well as the screen.
+
+### main.py
 This is the main file of the application. 
-    - It first starts a thread in which all asynchronous actions are performed
-    - After that it draws the main window and registers keypress handlers
-    - Then it starts the background threads for controlling the drone and updating the menu bar.
-    - Finally, it configures the main window a bit and starts dearpygui.
+- It first starts a thread in which all asynchronous actions are performed
+- After that it draws the main window and registers keypress handlers
+- Then it starts the background threads for controlling the drone and updating the menu bar.
+- Finally, it configures the main window a bit and starts dearpygui.
+
+### misc
+This folder contains other files used for testing purposes. It contains the images used in this readme, the dearpygui's demo, and a file to find out what numbers are mapped to what keys.
 
 ## Contributing Guidelines
 
