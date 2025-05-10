@@ -1,5 +1,6 @@
 from core.app_state import AppState
 import dearpygui.dearpygui as dpg
+import platform
 
 
 def handle_key_input():
@@ -27,8 +28,11 @@ def handle_key_input():
     with dpg.handler_registry():
         # Throttle controls
         dpg.add_key_press_handler(key=dpg.mvKey_LShift, callback=lambda: update_throttle(50))  # Increase throttle
-        dpg.add_key_press_handler(key=530, callback=lambda: update_throttle(-50))  # Decrease throttle
-        # REPLACE KEY WITH dpg.mvKey_LControl ON NON MACOS DEVICES
+        if platform.system() == "Darwin":  # Decrease throttle for MacOS
+            dpg.add_key_press_handler(key=530, callback=lambda: update_throttle(-50))
+        else:  # Decrease throttle for other OSes
+            dpg.add_key_press_handler(key=dpg.mvKey_LControl, callback=lambda: update_throttle(-50))
+
         # Pitch (W/S)
         dpg.add_key_press_handler(key=dpg.mvKey_W, callback=lambda: update_rc_controls(0, -1000))  # Forward
         dpg.add_key_release_handler(key=dpg.mvKey_W, callback=lambda: update_rc_controls(0, 0))  # Reset pitch

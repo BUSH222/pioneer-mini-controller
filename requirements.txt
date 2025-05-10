@@ -1,4 +1,7 @@
+dearpygui==2.0.0
 numpy==2.2.5
 opencv_contrib_python==4.7.0.72
-opencv_python==4.9.0.80
+opencv_python==4.11.0.86
+opencv_python_headless==4.10.0.84
 pioneer_sdk==0.5.3
+Requests==2.32.3
