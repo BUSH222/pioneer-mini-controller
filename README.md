@@ -39,7 +39,7 @@ This repository contains a program to control geoscan's pioneer mini drone, writ
 
 1. **Clone the Repository**:
     ```bash
-    git clone https://github.com/your-username/pioneer-mini-controller.git
+    git clone https://github.com/BUSH222/pioneer-mini-controller.git
     cd pioneer-mini-controller
     ```
 
@@ -51,12 +51,12 @@ This repository contains a program to control geoscan's pioneer mini drone, writ
 
 3. **Install Dependencies**:
     ```bash
-    pip install -r requirements.txt
+    pip3 install -r requirements.txt  # On Windows: pip
     ```
 
 4. **Run the Application**:
     ```bash
-    python main.py
+    python3 main.py  # On Windows: python
     ```
 
 5. **Additional Notes**:
@@ -152,7 +152,7 @@ This folder contains other files used for testing purposes. It contains the imag
 We welcome contributions to the Pioneer Mini Controller project! To ensure a smooth collaboration, please follow these guidelines:
 
 ### Reporting Issues
-- Before reporting an issue, check the [issue tracker](https://github.com/your-username/pioneer-mini-controller/issues) to see if it has already been reported.
+- Before reporting an issue, check the [issue tracker](https://github.com/BUSH222/pioneer-mini-controller/issues) to see if it has already been reported.
 - Provide a clear and descriptive title for the issue.
 - Include steps to reproduce the issue, expected behavior, and actual behavior.
 - Attach relevant logs, screenshots, or error messages if applicable.
